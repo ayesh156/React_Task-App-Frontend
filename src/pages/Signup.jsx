@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {useSelector} from "react-redux";
@@ -7,9 +7,11 @@ const Signup = () => {
     const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
     const history = useNavigate();
 
-    if (isLoggedIn === true) {
-        history("/");
-    }
+    useEffect(() => {
+        if (isLoggedIn) {
+            history("/");
+        }
+    }, [isLoggedIn, history]);
 
     const [Data, setData] = React.useState({username: "", email: "", password: ""});
     const change =  (e) => {
@@ -22,7 +24,7 @@ const Signup = () => {
                 alert("All fields are required");
             } else {
                 const response = await axios.post(
-                    "https://3.85.25.96:3001/api/v1/sign-in",
+                    process.env.REACT_APP_ENDPOINT + "/api/v1/sign-in",
                     Data
                 )
                 setData({username: "", email: "", password: ""});
