@@ -4,8 +4,9 @@ import {MdDelete} from "react-icons/md";
 import {PiHeartBold, PiHeartFill} from "react-icons/pi";
 import {IoAddCircleSharp} from "react-icons/io5";
 import axios from "axios";
+import {Button, Card, CardActionArea, CardContent} from "@mui/material";
 
-const Cards = ({ home, setInputDiv, data }) => {
+const Cards = ({ home, setInputDiv, data, setUpdatedData }) => {
     // Initialize tasks state with the received data prop
     const [tasks, setTasks] = useState(data);
 
@@ -56,6 +57,11 @@ const Cards = ({ home, setInputDiv, data }) => {
         }
     };
 
+    const handleUpdate = (id, title, desc) => {
+        setInputDiv("fixed");
+        setUpdatedData({ id: id, title: title, desc: desc });
+    };
+
     const deleteTask = async (id) => {
         try {
             const response = await axios.delete(
@@ -72,43 +78,67 @@ const Cards = ({ home, setInputDiv, data }) => {
     };
 
     return (
-        <div className="grid grid-cols-3 gap-4 p-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-2 sm:gap-2 lg:gap-4 p-2 sm:p-4">
             {tasks && tasks.map((items, i) => (
-                <div key={i} className="flex flex-col justify-between bg-gray-800 rounded-sm p-4">
-                    <div>
-                        <h3 className="text-xl font-semibold">{items.title}</h3>
-                        <h3 className="text-gray-300 my-2">{items.desc}</h3>
-                    </div>
-                    <div className="mt-4 w-full flex items-center">
-                        <button
-                            className={`${items.complete ? "bg-green-700" : "bg-red-400"} p-2 rounded w-3/6`}
-                            onClick={() => handleCompleteTask(items._id)}
-                        >
-                            {items.complete ? "Completed" : "Incomplete"}
-                        </button>
-                        <div className="text-white p-2 w-3/6 text-2xl font-semibold flex justify-around">
-                            <button onClick={()=>handleImportant(items._id)}>
-                                {items.important === false ? (
-                                    <PiHeartBold />
-                                ): (
-                                    <PiHeartFill className="text-red-500" />
-                                )}
+                <Card key={i} sx={{ backgroundColor: "#1F2937" }}>
 
-                            </button>
-                            <button><FaEdit /></button>
-                            <button onClick={()=>deleteTask(items._id)}><MdDelete /></button>
+                        <div className="flex flex-col justify-between p-4">
+
+                        <CardContent>
+                                <div>
+                                    <h3 className="text-xl text-white font-semibold">{items.title}</h3>
+                                    <h3 className="text-gray-300 my-2">{items.desc}</h3>
+                                </div>
+                                <div className="mt-4 w-full flex items-center">
+                                    <Button variant="contained" color={items.complete ? "success" : "error"}
+                                        className={"w-3/6"}
+                                        onClick={() => handleCompleteTask(items._id)}
+                                        sx={{ textTransform: 'none' }}  // Prevents automatic uppercase transformation
+                                    >
+                                        {items.complete ? "Completed" : "Incomplete"}
+                                    </Button>
+                                    <div className="text-white p-2 w-3/6 text-2xl font-semibold flex justify-around">
+                                        <button onClick={() => handleImportant(items._id)}>
+                                            {items.important === false ? (
+                                                <PiHeartBold/>
+                                            ) : (
+                                                <PiHeartFill className="text-red-500"/>
+                                            )}
+
+                                        </button>
+                                        {home !== "false" && (
+                                            <button onClick={() => handleUpdate(items._id, items.title, items.desc)}>
+                                                <FaEdit/>
+                                            </button>
+                                        )}
+
+                                        <button onClick={() => deleteTask(items._id)}><MdDelete/></button>
+                                    </div>
+                                </div>
+                        </CardContent>
                         </div>
-                    </div>
-                </div>
+                </Card>
+
             ))}
             {home === "true" && (
-                <div
-                    className="flex flex-col justify-center items-center bg-gray-800 rounded-sm p-4 text-gray-300 hover:scale-105 transition duration-300 cursor-pointer"
-                    onClick={() => setInputDiv("fixed")}
+                <Card
+                    sx={{
+                        backgroundColor: "#1F2937",
+                        '&:hover': {
+                            transform: 'scale(1.05)', // Scale the card on hover
+                            transition: 'transform 0.3s ease', // Smooth transition
+                        },
+                    }}
                 >
-                    <IoAddCircleSharp className="text-5xl" />
-                    <h2 className="text-2xl mt-4">Add Task</h2>
-                </div>
+                    <CardActionArea>
+                        <CardContent onClick={() => setInputDiv("fixed")} className="flex flex-col justify-center items-center text-gray-300 cursor-pointer">
+
+                                <IoAddCircleSharp className="text-5xl"/>
+                                <h2 className="text-2xl mt-4">Add Task</h2>
+
+                        </CardContent>
+                    </CardActionArea>
+                </Card>
             )}
         </div>
     );

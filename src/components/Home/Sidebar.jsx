@@ -5,29 +5,33 @@ import {FaCheckDouble} from "react-icons/fa6";
 import {TbNotebookOff} from "react-icons/tb";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
-import { authActions } from "../../store/auth";
+import {authActions} from "../../store/auth";
 import axios from "axios";
+import { useTheme } from '@mui/material/styles';
+import {Button, Stack, useMediaQuery} from "@mui/material";
+import {FiLogOut} from "react-icons/fi";
 
-const Sidebar = () => {
+const Sidebar = ({userData}) => {
+    const theme = useTheme();
     const data = [
         {
             title: "All tasks",
-            icon: <CgNotes />,
+            icon: <CgNotes/>,
             link: "/"
         },
         {
             title: "Important tasks",
-            icon: <MdLabelImportant />,
+            icon: <MdLabelImportant/>,
             link: "/importantTasks"
         },
         {
             title: "Completed tasks",
-            icon: <FaCheckDouble />,
+            icon: <FaCheckDouble/>,
             link: "/completedTasks"
         },
         {
             title: "Incompleted tasks",
-            icon: <TbNotebookOff />,
+            icon: <TbNotebookOff/>,
             link: "/incompletedTasks"
         },
     ];
@@ -35,6 +39,7 @@ const Sidebar = () => {
     const location = useLocation();
     const dispatch = useDispatch();
     const history = useNavigate();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [Data, setData] = useState();
     const logout = () => {
@@ -53,34 +58,63 @@ const Sidebar = () => {
         const fetch = async () => {
             const response = await axios.get(
                 "http://localhost:3001/api/v2/get-all-tasks",
-                { headers }
+                {headers}
             );
             setData(response.data.data);
+            userData(response.data.data);
         };
-        fetch();
+        if (localStorage.getItem("id") && localStorage.getItem("token")) {
+            fetch();
+        }
     }, []);
 
     return (
-        <>
-            {Data && (
-                <div>
-                    <h2 className="text-xl font-semibold">{Data.username}</h2>
-                    <h4 className="mb-1 text-gray-400">{Data.email}</h4>
-                    <hr/>
-                </div>
-            )}
-            <div>
-                {data.map((items, i) => (
-                    <Link to={items.link} key={i}
-                          className={`my-2 flex items-center gap-2 ${location.pathname === items.link ? "bg-gray-700" : "inherit"} hover:bg-gray-600 p-2 rounded transition-all duration-300`}>
-                        {items.icon} {items.title}
-                    </Link>
-                ))}
-            </div>
-            <div>
-                <button className="bg-gray-600 w-full p-2 rounded" onClick={logout}>Log Out </button>
-            </div>
-        </>
+            <Stack mx={isSmallScreen ? 0 : 1} height="100vh">
+                <Stack
+                    spacing={2}
+                    mt={2}
+                    direction="column"
+                    alignItems="center"  // Center items in Stack
+                    flexGrow={1} // Takes up all available space, pushing logout button to bottom
+                >
+                    {data.map((items, i) => (
+                        <Link to={items.link} key={i} style={{
+                            width: "100%",
+                            textDecoration: "none",
+                            color: location.pathname === "/customer" ? "primary" : "white",
+
+                        }}>
+                        <Button key={i}
+                                disableElevation
+                                variant={location.pathname === items.link ? "contained" : "contained"}
+                                color={location.pathname === items.link ? "primary" : "none"}
+
+                                startIcon={items.icon}
+                                sx={{
+                                    paddingY: '0.8rem',
+                                    width: '100%',  // Make Button full-width within Stack
+                                    maxWidth: '300px',  // Optional: limit button width
+                                    display: "flex",
+                                    justifyContent: "flex-start",  // Center on small screens
+                                    color: location.pathname === items.link ? "primary" : "inherit",
+                                    "& .MuiButton-startIcon": {
+                                        color: "white", // Set the color of the start icon to white
+                                    },
+                                }}
+                        >
+                            {isSmallScreen ? "" : items.title}
+
+                        </Button>
+                        </Link>
+
+
+                    ))}
+                </Stack>
+                <Button color="error" sx={{paddingY: '0.8rem', marginBottom: '1rem'}} variant="contained" onClick={logout}>
+                    {isSmallScreen ? <FiLogOut className="text-xl" /> : "Log Out"}
+                </Button>
+            </Stack>
+
     )
 }
 

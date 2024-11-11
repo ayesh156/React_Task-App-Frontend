@@ -8,6 +8,11 @@ const AllTasks = () => {
     const [inputDiv, setInputDiv] = useState("hidden");
     const [Data, setData] = useState([]);
     const [isTaskAdded, setIsTaskAdded] = useState(false);  // State to trigger fetch after task is added
+    const [UpdatedData, setUpdatedData] = useState({
+        id: "",
+        title: "",
+        desc: "",
+    });
 
     const headers = {
         id: localStorage.getItem("id"),
@@ -29,11 +34,13 @@ const AllTasks = () => {
 
     // Fetch tasks on component mount
     useEffect(() => {
-        fetchTasks();
+        if (localStorage.getItem("id") && localStorage.getItem("token")) {
+            fetchTasks();
+        }
     }, []); // Empty dependency array ensures this runs only once when the component is mounted
 
     // Function to handle adding a task
-    const addTask = async (newTask) => {
+    const addTask = () => {
        setIsTaskAdded(true);  // Mark that a task was added
     };
 
@@ -53,9 +60,9 @@ const AllTasks = () => {
                         <IoAddCircleSharp className="text-4xl text-gray-400 hover:text-gray-100 transition-all duration-300" />
                     </button>
                 </div>
-                {Data && <Cards home={"true"} setInputDiv={setInputDiv} data={Data.tasks} />}
+                {Data && <Cards home={"true"} setInputDiv={setInputDiv} data={Data.tasks} setUpdatedData={setUpdatedData} />}
             </div>
-            <InputData inputDiv={inputDiv} setInputDiv={setInputDiv} addTask={addTask} />
+            <InputData inputDiv={inputDiv} setInputDiv={setInputDiv} addTask={addTask} UpdatedData={UpdatedData} setUpdatedData={setUpdatedData} />
         </>
     );
 };
